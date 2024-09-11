@@ -6,6 +6,7 @@ const App = () => {
   const queryClient = useQueryClient();
 
   const getPosts = async () => {
+    console.log("getPosts 호출! @@@@2");
     const response = await axios.get("http://localhost:4000/posts");
     console.log(response);
     return response.data;
@@ -14,6 +15,17 @@ const App = () => {
   const addPost = async (newPost) => {
     console.log("addPost 호출!!!!!!!!!!!!!!!!1 ");
     await axios.post("http://localhost:4000/posts", newPost);
+  };
+
+  //profile 불러오는 함수
+  const getProfile = async () => {
+    console.log("getProfile 호출! ");
+    const response = await axios.get("http://localhost:4000/profile");
+    return response;
+  };
+
+  const addComment = async (newComment) => {
+    await axios.post(`http://localhost:4000/profile/${name}`, newComment);
   };
 
   const {
@@ -25,6 +37,15 @@ const App = () => {
     queryFn: getPosts,
   });
 
+  const {
+    data: profile,
+    isPending: profileLoding,
+    isError: profileError,
+  } = useQuery({
+    queryKey: ["profile"],
+    queryFn: getProfile,
+  });
+
   const addMutation = useMutation({
     mutationFn: addPost,
     onSuccess: () => {
@@ -32,14 +53,21 @@ const App = () => {
     },
   });
 
+  const addCommentMutation = useMutation({
+    mutationFn: addComment,
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+    },
+  });
+
   const [title, setTitle] = useState("");
   const [views, setViews] = useState(0);
 
-  if (isPending) {
+  if (isPending || profileLoding) {
     return <div>loading...</div>;
   }
 
-  if (isError) {
+  if (isError || profileError) {
     return <div>Error...</div>;
   }
 
@@ -72,6 +100,13 @@ const App = () => {
           <>
             <div key={post.id}>
               {post.title} {post.views}
+              <button
+                onClick={() => {
+                  addCommentMutation.mutate(profile.comment);
+                }}
+              >
+                댓글보기
+              </button>
             </div>
           </>
         );
