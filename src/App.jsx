@@ -5,6 +5,13 @@ import { useState } from "react";
 const App = () => {
   const queryClient = useQueryClient();
 
+  const [title, setTitle] = useState("");
+  const [views, setViews] = useState(0);
+  const [text, setText] = useState("");
+  const [postId, setPostId] = useState(0);
+  const [comments, setComments] = useState("");
+
+  //posts 불러오는 함수
   const getPosts = async () => {
     console.log("getPosts 호출! @@@@2");
     const response = await axios.get("http://localhost:4000/posts");
@@ -12,6 +19,7 @@ const App = () => {
     return response.data;
   };
 
+  //posts 추가 함수
   const addPost = async (newPost) => {
     console.log("addPost 호출!!!!!!!!!!!!!!!!1 ");
     await axios.post("http://localhost:4000/posts", newPost);
@@ -24,14 +32,16 @@ const App = () => {
     return response;
   };
 
-  const addComment = async (newComment) => {
-    await axios.post(`http://localhost:4000/profile/${name}`, newComment);
+  //comments 함수
+  const addComment = async ({ text, postId }) => {
+    await axios.post("http://localhost:4000/comments", { text, postId });
   };
 
+  // * useQuery *
   const {
     data: posts,
-    isPending,
-    isError,
+    isPending: postLoading,
+    isError: postError,
   } = useQuery({
     queryKey: ["posts"],
     queryFn: getPosts,
@@ -46,6 +56,7 @@ const App = () => {
     queryFn: getProfile,
   });
 
+  // * useMutation *
   const addMutation = useMutation({
     mutationFn: addPost,
     onSuccess: () => {
@@ -60,14 +71,11 @@ const App = () => {
     },
   });
 
-  const [title, setTitle] = useState("");
-  const [views, setViews] = useState(0);
-
-  if (isPending || profileLoding) {
+  if (postLoading || profileLoding) {
     return <div>loading...</div>;
   }
 
-  if (isError || profileError) {
+  if (postError || profileError) {
     return <div>Error...</div>;
   }
 
@@ -95,18 +103,38 @@ const App = () => {
       >
         추가
       </button>
+
       {posts.map((post) => {
         return (
           <>
             <div key={post.id}>
-              {post.title} {post.views}
+              <h2>
+                제목 : {post.title} 조회수 : {post.views}
+              </h2>
+
+              <input
+                type="text"
+                value={comments}
+                onChange={(e) => {
+                  setComments(e.target.value);
+                }}
+              />
               <button
                 onClick={() => {
-                  addCommentMutation.mutate(profile.comment);
+                  addCommentMutation.mutate({ text, postId });
                 }}
               >
                 댓글보기
               </button>
+
+              {comments.map((comment) => {
+                return (
+                  <div key={comment.id}>
+                    {comment.text}
+                    {comment.postId}
+                  </div>
+                );
+              })}
             </div>
           </>
         );
