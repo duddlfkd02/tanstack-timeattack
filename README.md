@@ -24,3 +24,60 @@ https://youtu.be/3e-higRXoaM?si=hhnYeKG3xKZ_9V_Y
   👏 **낙관적 업데이트 (optimistic update)** 사용 시 유용
 
 - `mutateAsync` : `mutate` 와 동일하지만 `Promise` 를 반환함
+
+---
+
+## 💥 트러블슈팅
+
+### 발생한 문제
+
+: Todo 목록을 완료 버튼을 눌러도 즉시 버튼 text가 바뀌지 않음
+
+<img width="837" alt="mark as done 에러 발생" src="https://github.com/user-attachments/assets/88c98759-0327-4c48-9466-d59ac81c6094">
+
+`DevTools` 에는 `muatate success` 로 나오지만 버튼 text 는 바뀌지 않고 일정시간이 지나야 바뀌고 있었음
+
+<br />
+
+### 해결방법
+
+낙관적 업데이트로 `updateTodo` 함수 수정하기
+
+```tsx
+export default function useUpdateTodo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Todo) => updateTodo(data),
+
+    onMutate: async (newTodo) => {
+      const prevTodos = queryClient.getQueryData<Todo[]>(["todos"]);
+
+      queryClient.setQueryData<Todo[]>(["todos"], (old) =>
+        old?.map((todo) =>
+          todo.id === newTodo.id ? { ...todo, checked: newTodo.checked } : todo
+        )
+      );
+
+      return { prevTodos };
+    },
+
+    onError: (error, newTodo, context) => {
+      queryClient.setQueryData(["todos"], context?.prevTodos);
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
+    },
+  });
+}
+```
+
+- `setQueryData` : 쿼리의 캐시된 데이터를 즉시 업데이트하는 데 사용할 수 있는 동기 함수 <br />
+  _`setQueryData` 와 `fetchQuery`를 사용하는 것의 차이점 은 `setQueryData` 는 동기화되어 있고 이미 동기적으로 데이터를 사용할 수 있다고 가정한다는 것_
+- `getQueryData` : 기존 쿼리의 캐시된 데이터를 가져오는 데 사용할 수 있는 동기 함수 <br />
+  쿼리가 존재하지 않으면 `undefined`가 반환
+
+### 결과확인
+
+<img width="837" alt="낙관적업데이트 적용" src="https://github.com/user-attachments/assets/0b512c24-6c84-46a2-a79e-89495b88d1fb">
