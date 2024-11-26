@@ -22,7 +22,7 @@ export default function Todos() {
 
   const handleMarkAsDoneSubmit = (data: Todo | undefined) => {
     if (data) {
-      updateTodoMutation.mutate(data);
+      updateTodoMutation.mutate({ ...data, checked: true });
     }
   };
 

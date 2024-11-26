@@ -33,15 +33,24 @@ export default function useUpdateTodo() {
   return useMutation({
     mutationFn: (data: Todo) => updateTodo(data),
 
-    onSettled: async (_, error, valiables) => {
-      if (error) {
-        console.log(error);
-      } else {
-        await queryClient.invalidateQueries({ queryKey: ["todos"] });
-        await queryClient.invalidateQueries({
-          queryKey: ["todos", { id: valiables.id }],
-        });
-      }
+    onMutate: async (newTodo) => {
+      const prevTodos = queryClient.getQueryData<Todo[]>(["todos"]);
+
+      queryClient.setQueryData<Todo[]>(["todos"], (old) =>
+        old?.map((todo) =>
+          todo.id === newTodo.id ? { ...todo, checked: newTodo.checked } : todo
+        )
+      );
+
+      return { prevTodos };
+    },
+
+    onError: (error, newTodo, context) => {
+      queryClient.setQueryData(["todos"], context?.prevTodos);
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
     },
   });
 }
