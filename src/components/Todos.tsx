@@ -5,6 +5,7 @@ import useUpdateTodo, {
 } from "../services/mutations";
 import { useTodos, useTodosIds } from "../services/queries";
 import { Todo } from "../types/todo";
+import styles from "./Todos.module.css";
 
 export default function Todos() {
   const todosIsQuery = useTodosIds();
@@ -31,23 +32,35 @@ export default function Todos() {
   };
 
   return (
-    <>
-      <form onSubmit={handleSubmit(handleCreateTodoSubmit)}>
+    <div className={styles.container}>
+      <form
+        onSubmit={handleSubmit(handleCreateTodoSubmit)}
+        className={styles.form}
+      >
         <h4>New todo:</h4>
-        <input placeholder="Title" {...register("title")} />
+        <input
+          placeholder="Title"
+          {...register("title")}
+          className={styles.input}
+        />
         <br />
-        <input placeholder="Description" {...register("description")} />
+        <input
+          placeholder="Description"
+          {...register("description")}
+          className={styles.input}
+        />
         <br />
         <input
           type="submit"
           disabled={createTodoMutation.isPending}
           value={createTodoMutation.isPending ? "Creating..." : "Create Todo"}
+          className={styles.button}
         />
       </form>
 
-      <ul>
+      <ul className={styles.list}>
         {todosQueries.map(({ data }) => (
-          <li key={data?.id}>
+          <li key={data?.id} className={styles.listItem}>
             <div>Id: {data?.id}</div>
             <span>
               <strong>Title:</strong>
@@ -58,11 +71,20 @@ export default function Todos() {
               <button
                 onClick={() => handleMarkAsDoneSubmit(data)}
                 disabled={data?.checked}
+                className={styles.button}
+                style={{
+                  marginRight: "8px",
+                  background: data?.checked ? "#ccc" : "#49c797",
+                }}
               >
                 {data?.checked ? "Done" : "Mark as done"}
               </button>
               {data && data?.id && (
-                <button onClick={() => handleDeleteTodo(data.id!)}>
+                <button
+                  onClick={() => handleDeleteTodo(data.id!)}
+                  className={styles.button}
+                  style={{ background: "#f2717e" }}
+                >
                   Delete
                 </button>
               )}
@@ -70,6 +92,6 @@ export default function Todos() {
           </li>
         ))}
       </ul>
-    </>
+    </div>
   );
 }
