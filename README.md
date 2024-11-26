@@ -1,50 +1,26 @@
-# React + TypeScript + Vite
+# TanStack Query 복습하기
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### 👩🏻‍💻 목적 :
 
-Currently, two official plugins are available:
+1. `TanStack Query`의 기초 사용법을 익힌다. (✅ `mutation` 확실히 익히기)
+2. 부트캠프 강의에서는 사용하지 않았던 다양한 메소드 옵션들을 접하고 활용한다.
+3. `React-Hook-Form` 을 사용한 Todo-List `form` 을 만든다.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 📆 기간 :
 
-## Expanding the ESLint configuration
+24.11.25 - 24.11.26 (구현 + 복습)
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### 📀 참고 영상 :
 
-- Configure the top-level `parserOptions` property like this:
+https://youtu.be/3e-higRXoaM?si=hhnYeKG3xKZ_9V_Y
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+---
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## 📕 Mutation Options
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+- `onSettled` : `mutation`이 성공해서 성공한 데이터 또는 `error`가 전달될 때 실행 (성공, 실패 상관없이 결과 전달!)
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+- `onMutate` : `mutation` 함수 로직이 실행되기 전에 실행 -> `mutation` 함수가 받을 동일한 변수가 전달됨.
+  👏 **낙관적 업데이트 (optimistic update)** 사용 시 유용
+
+- `mutateAsync` : `mutate` 와 동일하지만 `Promise` 를 반환함
